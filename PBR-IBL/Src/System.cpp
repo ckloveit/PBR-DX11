@@ -196,8 +196,8 @@ void System::InitialiseWindows(int& screenWidth, int& screenHeight)
 		// Set the position of the window to the top left corner.
 		posX = posY = 0;
 	}
-	screenWidth = 1920;
-	screenHeight = 1200;
+	screenWidth = 1080;// 1920;
+	screenHeight = 720;// 1200;
 
 	// Place the window in the middle of the screen.
 	posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;
