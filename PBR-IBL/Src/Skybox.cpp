@@ -210,7 +210,7 @@ bool Skybox::CreateCubeMap(D3D* d3d, const HWND hwnd)
 
 	delete shader;
 	delete image;
-
+	
 	//Load Six CubeMap Texture
 	std::vector<Texture*> cubeImages;
 	cubeImages.push_back(new Texture());
@@ -234,16 +234,22 @@ bool Skybox::CreateCubeMap(D3D* d3d, const HWND hwnd)
 	cubeImages[4]->Initialize(device, deviceContext, "Textures/EnvironmentCube1/posz.bmp");
 	cubeImages[5]->Initialize(device, deviceContext, "Textures/EnvironmentCube1/negz.bmp");
 	_pCubeMap = new Cubemap;
-	/*
-	if (!_pCubeMap->Initialise(device, deviceContext, cubeFaces, SkyboxSize, SkyboxSize, 1))
+	bool bUseCubeMap = false;
+	if (bUseCubeMap)
 	{
-		return false;
+		if (!_pCubeMap->Initialise(device, deviceContext, cubeImages, SkyboxSize, SkyboxSize, 1))
+		{
+			return false;
+		}
 	}
-	*/
-	if (!_pCubeMap->Initialise(device, deviceContext, cubeImages, SkyboxSize, SkyboxSize, 1))
+	else
 	{
-		return false;
+		if (!_pCubeMap->Initialise(device, deviceContext, cubeFaces, SkyboxSize, SkyboxSize, 1))
+		{
+			return false;
+		}
 	}
+	
 	for (int i = 0; i < 6; ++i)
 	{
 		delete cubeFaces[i];
@@ -412,6 +418,7 @@ void Skybox::BindMesh(ID3D11DeviceContext* deviceContext) const
 bool Skybox::Render(ID3D11DeviceContext* deviceContext, bool bShowDebug) const
 {
 	BindMesh(deviceContext);
+	bShowDebug = false;
 	if (bShowDebug)
 	{
 		ID3D11ShaderResourceView* texture = _pIrradianceMap->GetSRV();

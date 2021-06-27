@@ -32,13 +32,15 @@ struct PixelInputType
 
 SamplerState textureSampler;
 
-TextureCube irradianceMap;
-TextureCube preFilterMap;
-Texture2D brdfLUT;
+TextureCube irradianceMap: register(t0);
+TextureCube preFilterMap: register(t1);
+Texture2D brdfLUT: register(t2);
 
+/*
 Texture2D normalMap;
 Texture2D roughnessMap;
 Texture2D metallicMap;
+*/
 
 PixelInputType VSMain(VertexInputType input)
 {
@@ -106,11 +108,11 @@ float4 PSMain(PixelInputType input) : SV_TARGET
 {
 	float3 WorldPos = input.worldPos;
 	
-	float3 albedo = input.color.rgb;
+    float3 albedo = float3(1.0f, 0.0f, 0.0f);// input.color.rgb;
 	
-	float3 Normal = input.normal * normalMap.Sample(textureSampler, input.uv).rgb;
-	float roughness = roughnessMap.Sample(textureSampler, input.uv).r;
-	float metallic = metallicMap.Sample(textureSampler, input.uv).r;
+    float3 Normal = input.normal;// *normalMap.Sample(textureSampler, input.uv).rgb;
+    float roughness = 0;// roughnessMap.Sample(textureSampler, input.uv).r;
+    float metallic = 0.0f;// metallicMap.Sample(textureSampler, input.uv).r;
 
 	float ao = 1.0;
 
@@ -120,9 +122,38 @@ float4 PSMain(PixelInputType input) : SV_TARGET
 
     float3 F0 = float3(0.04, 0.04, 0.04); 
     F0 = lerp(F0, albedo, metallic);
-	           
+
     // reflectance equation
     float3 Lo = float3(0.0, 0.0, 0.0);
+
+    // Directional Lighting
+    {
+        // calculate per-light radiance
+        float3 L = normalize(lightPositions[0].xyz);
+        float3 H = normalize(V + L);
+        float attenuation = 1.0;
+        //float attenuation = 10.0 / (distance);
+        float3 radiance = lightColours[0].xyz * attenuation;
+
+        // cook-torrance brdf
+        float NDF = DistributionGGX(N, H, roughness);
+        float G = GeometrySmith(N, V, L, roughness);
+        float3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+        float3 kS = F;
+        float3 kD = float3(1.0, 1.0, 1.0) - kS;
+        kD *= 1.0 - metallic;
+
+        float3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+        float3 specular = numerator / max(denominator, 0.001);
+
+        // add to outgoing radiance Lo
+        float NdotL = max(dot(N, L), 0.0);
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    }
+
+    /*
     for(int i = 0; i < 4; ++i) 
     {
         // calculate per-light radiance
@@ -150,6 +181,7 @@ float4 PSMain(PixelInputType input) : SV_TARGET
         float NdotL = max(dot(N, L), 0.0);                
         Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
     }   
+    */
 
 	float3 F = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 
@@ -157,20 +189,30 @@ float4 PSMain(PixelInputType input) : SV_TARGET
 	float3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
 
+    // -------------IBL Lighting-----------------------//
 	float3 irradiance = irradianceMap.Sample(textureSampler, N).rgb;
-	float3 diffuse = irradiance * albedo;
-
+	float3 indirectDiffuse = irradiance * albedo;
 	const float MAX_REFLECTION_LOD = 4.0;
 	float3 prefilteredColor = preFilterMap.SampleLevel(textureSampler, R, roughness * MAX_REFLECTION_LOD).rgb;
+   
 	float2 envBRDF = brdfLUT.Sample(textureSampler, float2(max(dot(N, V), 0.0), roughness)).rg;
-	float3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+   
+	float3 indirectSpecular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+   
+    // ------------------------------------------------//
 
-	float3 ambient = (kD * diffuse + specular) * ao;
-
+	float3 ambient = (kD * indirectDiffuse + indirectSpecular) * ao;
+   
     float3 color = ambient + Lo;
 	
-    color = color / (color + float3(1.0, 1.0, 1.0));
-    color = pow(color, float3(1.0/2.2, 1.0/2.2, 1.0/2.2));  
-   
-    return float4(color, 1.0);
+    // Tonemap
+    color = color / (color + float3(1.0f, 1.0f, 1.0f));
+
+    // Gamma Inverse Correct
+    float invGamma = 1.0f / 2.2f;
+    color = pow(color, float3(invGamma, invGamma, invGamma));
+
+    return float4(color, 1.0f);
+
+
 }

@@ -72,10 +72,15 @@ void Shapes::CreateCube(MeshData& meshData, int& vertexCount, int& indexCount)
 
 	for (int i = 0; i < 6; ++i)
 	{
+		/*
 		vertices[i * 4].Uv = _11;
 		vertices[i * 4 + 1].Uv = _01;
 		vertices[i * 4 + 2].Uv = _00;
-		vertices[i * 4 + 3].Uv = _10;
+		vertices[i * 4 + 3].Uv = _10;*/
+		vertices[i * 4].Uv = _00;
+		vertices[i * 4 + 1].Uv = _10;
+		vertices[i * 4 + 2].Uv = _11;
+		vertices[i * 4 + 3].Uv = _01;
 	}
 
 	meshData.PosUvVertexData = vertices;

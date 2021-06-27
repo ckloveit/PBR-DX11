@@ -184,6 +184,10 @@ bool Input::IsKeyDown(const int keyCode)
 	return (_mKeyboardState[keyCode] & 0x80) != 0;
 }
 
+bool Input::IsMouseDown(int button)
+{
+	return _mMouseState.rgbButtons[button];
+}
 void Input::GetMouseLocation(int& x, int& y) const
 {
 	x = _mMouseX;

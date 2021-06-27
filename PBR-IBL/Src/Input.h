@@ -17,6 +17,7 @@ public:
 	bool Frame();
 
 	bool IsKeyDown(int keyCode);
+	bool IsMouseDown(int button);
 	void GetMouseLocation(int& x, int& y) const;
 	void GetMouseDelta(int& x, int& y) const;
 

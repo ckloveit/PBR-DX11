@@ -47,6 +47,9 @@ bool FrameCBuffer::Update(ID3D11DeviceContext* deviceContext, XMMATRIX viewMatri
 			++lightIndex;
 		}
 	}
+	//Debug Directional Light
+	matrixPtr->LightPositions[0] = XMFLOAT4(0.707106709f, 0.707106709f, 0.0f, 0.0f);
+	matrixPtr->LightColours[0] = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
 
 	deviceContext->Unmap(_pBuffer, 0);
 

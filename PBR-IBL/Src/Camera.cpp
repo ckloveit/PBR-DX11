@@ -135,6 +135,11 @@ void Camera::UpdateInput(Input* input)
 	int x, y;
 	input->GetMouseDelta(x, y);
 
+	if (!input->IsMouseDown(0))
+	{
+		return;
+	}
+
 	const float sensitivity = 0.1f;
 	const float xScaled = x * sensitivity;
 	const float yScaled = y * sensitivity;

@@ -78,7 +78,6 @@ Graphics::~Graphics()
 bool Graphics::Initialise(const int screenWidth, const int screenHeight, const HWND hwnd, Input* input)
 {
 	_pInput = input;
-
 	// Create the Direct3D object.
 	_pD3D = new D3D;
 	if (!_pD3D)
@@ -95,34 +94,34 @@ bool Graphics::Initialise(const int screenWidth, const int screenHeight, const H
 	}
 
 	ID3D11Device* device = _pD3D->GetDevice();
-	/*
+	
 	_pMetallic = new Texture;
-	HRESULT hr = _pMetallic->Initialise(device, L"metallic.dds");
+	HRESULT hr = _pMetallic->Initialise(device, "Textures/metallic.dds");
 	if (!hr)
 	{
 		return false;
 	}
 
 	_pNormal = new Texture;
-	hr = _pNormal->Initialise(device, L"normal.dds");
+	hr = _pNormal->Initialise(device, "Textures/normal.dds");
 	if (!hr)
 	{
 		return false;
 	}
 
 	_pRoughness = new Texture;
-	hr = _pRoughness->Initialise(device, L"roughness.dds");
+	hr = _pRoughness->Initialise(device, "Textures/roughness.dds");
 	if (!hr)
 	{
 		return false;
-	}*/
+	}
 
 	// Create the camera object.
 	_pCamera = new Camera;
 	_pCamera->Initialise(screenWidth, screenHeight, ScreenNear, ScreenDepth);
 
 	// Set the initial position of the camera.
-	_pCamera->SetPosition(0.0f, 0.0f, -10.0f);
+	_pCamera->SetPosition(10.0f, 10.0f, -20.0f);
 
 	_pFrameBuffer = new FrameCBuffer;
 	_pFrameBuffer->Initialise(device);
@@ -132,6 +131,7 @@ bool Graphics::Initialise(const int screenWidth, const int screenHeight, const H
 
 	_pSkybox = new Skybox;
 	_pSkybox->Initialise(_pD3D, hwnd, _pFrameBuffer, _pCamera);
+
 
 	// Create the model object.
 	for (int i = 0; i < 10; ++i)
@@ -150,6 +150,7 @@ bool Graphics::Initialise(const int screenWidth, const int screenHeight, const H
 			_pModels.push_back(model);
 		}
 	}
+
 
 	_pPBRShader = new PBRShader;
 	if (!_pPBRShader)
@@ -189,9 +190,11 @@ bool Graphics::Render() const
 	bool bDebug = false;
 	if (_pInput->IsKeyDown(DIK_Q))
 	{
-		bDebug = true;
+		//bDebug = true;
 	}
 	result = _pSkybox->Render(context, bDebug);
+	//_pSkybox->CreateCubeMap(_pD3D, nullptr);
+
 	if (!result)
 	{
 		return false;
@@ -199,15 +202,16 @@ bool Graphics::Render() const
 
 	_pCamera->GetWorldMatrix(worldMatrix);
 
-	/*
+	
 	// Bind textures.
+	/*
 	ID3D11ShaderResourceView* normal = _pNormal->GetSRV();
 	ID3D11ShaderResourceView* roughness = _pRoughness->GetSRV();
 	ID3D11ShaderResourceView* metallic = _pMetallic->GetSRV();
 	context->PSSetShaderResources(3, 1, &normal);
 	context->PSSetShaderResources(4, 1, &roughness);
 	context->PSSetShaderResources(5, 1, &metallic);
-
+	*/
 	// Render meshes.
 	for (auto it = _pModels.begin(); it != _pModels.end(); ++it)
 	{
@@ -227,7 +231,7 @@ bool Graphics::Render() const
 			return false;
 		}
 	}
-	*/
+	
 	_pD3D->EndScene();
 	return true;
 }

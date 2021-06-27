@@ -23,8 +23,8 @@ public:
 	bool Initialise(D3D* d3d, HWND__* hwnd, FrameCBuffer* frameBuffer, Camera* camera);
 	bool Render(ID3D11DeviceContext* deviceContext, bool bShowDebug) const;
 
-private:
 	bool CreateCubeMap(D3D* d3d, HWND__* hwnd);
+private:
 	void BindMesh(ID3D11DeviceContext* deviceContext) const;
 
 	ID3D11Buffer* _pVertexBuffer = nullptr;
