@@ -7,3 +7,6 @@ I have modify this project to use Premake to generate and Add CubeMap support to
 
 # Windows Build
 just run the Win-GenerateProjects.bat, Open the PBR-IBL.sln
+
+# Debug Result
+roughness = 0, metallic = 0, the directional light is rotate Z with 45
